@@ -34,6 +34,7 @@ private:
     int field_44;
     bool isInputAcceleration;
     bool isInputBreak;
+    bool isInputReverse;
     bool isInputBack;
     bool isInputForward;
     bool isInputUp;

@@ -46,6 +46,9 @@ Image::Image(const std::string& embeddedPath)
 
 Image::~Image()
 {
+    if (this->texture) {
+        SDL_DestroyTexture(this->texture);
+    }
     SDL_FreeSurface(this->surface);
 }
 
@@ -62,4 +65,17 @@ int Image::getHeight() const
 SDL_Surface* Image::getSurface() const
 {
     return this->surface;
+}
+
+SDL_Texture* Image::getTexture(SDL_Renderer* renderer)
+{
+    if (this->texture == nullptr || this->textureRenderer != renderer) {
+        if (this->texture) {
+            SDL_DestroyTexture(this->texture);
+        }
+        this->texture = SDL_CreateTextureFromSurface(renderer, this->surface);
+        this->textureRenderer = renderer;
+    }
+
+    return this->texture;
 }

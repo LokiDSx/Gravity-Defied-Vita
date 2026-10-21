@@ -28,6 +28,7 @@ private:
     Command* commandBack;
     GameMenu* gameMenuMain;
     GameMenu* gameMenuPlay;
+    GameMenu* gameMenuMods;
     GameMenu* gameMenuOptions;
     GameMenu* gameMenuAbout;
     GameMenu* gameMenuHelp;
@@ -36,6 +37,7 @@ private:
     GameMenu* gameMenuFinished;
     GameMenu* gameMenuIngame;
     TimerOrMotoPartOrMenuElem* taskPlayMenu;
+    TimerOrMotoPartOrMenuElem* taskMods;
     TimerOrMotoPartOrMenuElem* taskOptions;
     TimerOrMotoPartOrMenuElem* taskHelp;
     SettingsStringRender* settingStringLevel;
@@ -71,6 +73,9 @@ private:
     GameMenu* gameMenuEnterName;
     SettingsStringRender* settingStringBack;
     SettingsStringRender* settingStringPlayMenu;
+    SettingsStringRender* trackpackSetting;
+    SettingsStringRender* taskModsBack;
+    GameMenu* gameMenuModsList;
     SettingsStringRender* settingStringContinue;
     SettingsStringRender* settingStringGoToMain;
     SettingsStringRender* settingStringExitGame;
@@ -153,6 +158,7 @@ public:
     void run();
     void showAlert(std::string title, std::string alertText, Image* image);
     void processMenu(IGameMenuElement* menuElement);
+    void onModSwitched();
     int method_210();
     void method_211(int var1);
     int method_212();

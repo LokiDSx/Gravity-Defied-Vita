@@ -1,5 +1,6 @@
 #include "Canvas.h"
 
+#include <SDL2/SDL.h>
 #include <stdexcept>
 #include <algorithm>
 
@@ -46,6 +47,11 @@ CanvasImpl* Canvas::getCanvasImpl()
 void Canvas::repaint()
 {
     // IMPROVE two lines below is a hack to make the game work in one thread
+    // Force a full-screen opaque clear before every frame: SDL_RenderFillRect
+    // (via GXM geometry) does not erase the previous frame on the Vita, which
+    // caused ghost frames to accumulate on screen.
+    SDL_SetRenderDrawColor(impl->getRenderer(), 255, 255, 255, 255);
+    SDL_RenderClear(impl->getRenderer());
     paint(graphics.get());
     impl->processEvents();
 
@@ -64,6 +70,7 @@ int Canvas::getGameAction(int keyCode)
     case Keys::LEFT:
     case Keys::RIGHT:
     case Keys::FIRE:
+    case Keys::REVERSE:
         return keyCode;
     default:
         throw std::runtime_error("getGameAction(" + std::to_string(keyCode) + ") isn't implemented!");

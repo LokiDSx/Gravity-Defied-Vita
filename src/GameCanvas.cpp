@@ -4,6 +4,7 @@
 #include "MenuManager.h"
 #include "lcdui/Image.h"
 #include "lcdui/FontStorage.h"
+#include "utils/Time.h"
 
 #include <memory>
 #include <vector>
@@ -356,7 +357,7 @@ void GameCanvas::renderFender(int x, int y, int angleF16)
 void GameCanvas::clearScreenWithWhite()
 {
     graphics->setColor(255, 255, 255);
-    graphics->fillRect(0, 0, width, height2);
+    graphics->clear();
 }
 
 void GameCanvas::setColor(int red, int green, int blue)
@@ -391,7 +392,7 @@ void GameCanvas::drawGame(Graphics* g)
         if (field_184 != 0) {
             if (field_184 == 1) {
                 graphics->setColor(255, 255, 255);
-                graphics->fillRect(0, 0, getWidth(), getHeight());
+                graphics->clear();
                 if (logoImage != nullptr) {
                     graphics->drawImage(logoImage.get(), getWidth() / 2, getHeight() / 2, 3);
                     drawSprite(graphics, 16, getWidth() - spriteSizeX[16] - 5, getHeight() - spriteSizeY[16] - 7);
@@ -399,7 +400,7 @@ void GameCanvas::drawGame(Graphics* g)
                 }
             } else {
                 graphics->setColor(255, 255, 255);
-                graphics->fillRect(0, 0, getWidth(), getHeight());
+                graphics->clear();
                 if (splashImage != nullptr) {
                     graphics->drawImage(splashImage.get(), getWidth() / 2, getHeight() / 2, 3);
                 }
@@ -435,9 +436,9 @@ void GameCanvas::drawGame(Graphics* g)
             }
 
             // print fps to screen
-            // setColor(0, 0, 0);
-            // graphics->setFont(font);
-            // graphics->drawString("FPS: " + std::to_string(fps), defaultFontWidth00, height2 - 5, 36);
+            setColor(0, 0, 0);
+            graphics->setFont(font);
+            graphics->drawString("FPS: " + std::to_string(fps), defaultFontWidth00, height2 - 5, 36);
 
             var3 = gamePhysics->method_52();
             method_161(var3, false);
@@ -464,15 +465,15 @@ void GameCanvas::method_163(int var1)
 
 void GameCanvas::paint(Graphics* graphics)
 {
-    // static int64_t time = 0;
-    // int64_t now = Time::currentTimeMillis();
-    // int64_t delta = now - time;
-    // time = now;
-    // if (delta != 0) {
-    //     fps = 1000 / delta;
-    //     // std::cout << "FPS: " << fps <<  std::endl;
-    //     //setWindowTitle(std::string("Gravity Defied. FPS: ") + std::to_string(fps));
-    // }
+    static int64_t time = 0;
+    int64_t now = Time::currentTimeMillis();
+    int64_t delta = now - time;
+    time = now;
+    if (delta != 0) {
+        fps = 1000 / delta;
+        // std::cout << "FPS: " << fps <<  std::endl;
+        //setWindowTitle(std::string("Gravity Defied. FPS: ") + std::to_string(fps));
+    }
 
     processTimers(); // We need to call this function as often as we can. It might be better to move this call somewhere.
     if (Micro::isInGameMenu && menuManager != nullptr) {

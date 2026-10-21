@@ -24,7 +24,8 @@ public:
         DOWN = 6,
         LEFT = 2,
         RIGHT = 5,
-        FIRE = 8
+        FIRE = 8,
+        REVERSE = 3
     };
 
     Canvas();

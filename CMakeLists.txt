@@ -3,7 +3,11 @@ project(gravity_defied_cpp C CXX)
 
 unset(ENV{PKG_CONFIG_PATH})
 
-if(WIN32)
+if(VITA)
+    include("${VITASDK}/share/vita.cmake" REQUIRED)
+endif()
+
+if(WIN32 AND NOT VITA)
     include(cmake/mingw-sdl2.cmake)
     download_mingw_sdl2(
         "2.26.1"    # SDL2
@@ -12,11 +16,17 @@ if(WIN32)
     )
 endif()
 
-find_package(PkgConfig REQUIRED)
+if(VITA)
+    find_package(SDL2 REQUIRED CONFIG)
+    find_package(SDL2_ttf REQUIRED CONFIG)
+    find_package(SDL2_image REQUIRED CONFIG)
+else()
+    find_package(PkgConfig REQUIRED)
 
-pkg_search_module(SDL2 REQUIRED IMPORTED_TARGET sdl2)
-pkg_search_module(SDL2_TTF REQUIRED IMPORTED_TARGET SDL2_ttf)
-pkg_search_module(SDL2_IMAGE REQUIRED IMPORTED_TARGET SDL2_image)
+    pkg_search_module(SDL2 REQUIRED IMPORTED_TARGET sdl2)
+    pkg_search_module(SDL2_TTF REQUIRED IMPORTED_TARGET SDL2_ttf)
+    pkg_search_module(SDL2_IMAGE REQUIRED IMPORTED_TARGET SDL2_image)
+endif()
 
 # Create a sources variable with a link to all cpp files to compile
 set(SOURCES
@@ -35,6 +45,7 @@ set(SOURCES
     src/GameMenu.cpp
     src/SettingsStringRender.cpp
     src/MenuManager.cpp
+    src/ModsManager.cpp
     src/RecordManager.cpp
     src/Timer.cpp
     src/lcdui/CanvasImpl.cpp
@@ -69,7 +80,7 @@ cmrc_add_resource_library(Assets
 )
 
 # Compile resources when building for Windows.
-if(WIN32)
+if(WIN32 AND NOT VITA)
     enable_language(RC)
     list(APPEND SOURCES winres/res.rc)
 endif()
@@ -78,6 +89,10 @@ add_executable(GravityDefied ${SOURCES})
 
 target_compile_features(GravityDefied PRIVATE cxx_std_17)
 target_compile_options(GravityDefied PRIVATE -Wall -Wextra)
+
+if(VITA)
+    target_compile_definitions(GravityDefied PRIVATE VITA_PORT)
+endif()
 
 target_include_directories(GravityDefied PRIVATE
                            ${SDL2_INCLUDE_DIRS}
@@ -89,9 +104,25 @@ target_link_directories(GravityDefied PRIVATE
                         ${SDL2_TTF_LIBRARY_DIRS}
                         ${SDL2_IMAGE_LIBRARY_DIRS})
 
-set_target_properties(GravityDefied PROPERTIES LINK_FLAGS_RELEASE -s)
+if(NOT VITA)
+    set_target_properties(GravityDefied PROPERTIES LINK_FLAGS_RELEASE -s)
+endif()
 
-if(WIN32)
+if(VITA)
+    # Static libraries on Vita need to be wrapped in a group: SDL2_image needs
+    # libpng/zlib, SDL2_ttf needs freetype/bzip2/zlib in no particular order.
+    target_link_libraries(GravityDefied
+                          -Wl,--start-group
+                          SDL2_image::SDL2_image-static
+                          PNG::PNG
+                          SDL2_ttf::SDL2_ttf-static
+                          Freetype::Freetype
+                          SDL2::SDL2
+                          Assets::Assets
+                          z
+                          bz2
+                          -Wl,--end-group)
+elseif(WIN32)
     target_link_options(GravityDefied PRIVATE -static -mwindows)
     target_link_libraries(GravityDefied 
                          ${SDL2_STATIC_LIBRARIES} 
@@ -104,6 +135,18 @@ else()
                           ${SDL2_TTF_LIBRARIES}
                           ${SDL2_IMAGE_LIBRARIES}
                           Assets::Assets)
+endif()
+
+if(VITA)
+    vita_create_self(eboot.bin GravityDefied)
+    vita_create_vpk(GravityDefied.vpk GDIF00001 eboot.bin
+        VERSION 01.00
+        NAME "Gravity Defied"
+        FILE sce_sys/icon0.png sce_sys/icon0.png
+        FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
+        FILE sce_sys/livearea/contents/startup.png sce_sys/livearea/contents/startup.png
+        FILE sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+    )
 endif()
 
 # Copy assets to the build directory

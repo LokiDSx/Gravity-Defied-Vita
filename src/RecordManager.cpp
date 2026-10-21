@@ -4,13 +4,14 @@
 #include "rms/RecordStoreException.h"
 #include "rms/RecordStoreNotOpenException.h"
 #include "rms/InvalidRecordIDException.h"
+#include "ModsManager.h"
 
 void RecordManager::method_8(int var1, int var2)
 {
     resetRecordsTime();
 
     try {
-        str = std::to_string(var1) + std::to_string(var2);
+        str = ModsManager::getStorePrefix() + std::to_string(var1) + std::to_string(var2);
         recordStore = RecordStore::openRecordStore(str, true);
     } catch (RecordStoreException& var9) {
         return;
@@ -213,9 +214,13 @@ void RecordManager::addNewRecord(int gameLevel, int position)
 void RecordManager::deleteRecordStores()
 {
     std::vector<std::string> names = RecordStore::listRecordStores();
+    std::string prefix = ModsManager::getStorePrefix();
+    std::string myStates = prefix + "GDTRStates";
 
     for (std::size_t i = 0; i < names.size(); ++i) {
-        if (names[i] != "GDTRStates") {
+        bool isModStore = names[i].rfind("mod_", 0) == 0;
+        bool belongsToCurrentPack = prefix.empty() ? !isModStore : (isModStore && names[i].rfind(prefix, 0) == 0);
+        if (belongsToCurrentPack && names[i] != myStates) {
             try {
                 // RecordStore *var10000 = recordStore;
                 RecordStore::deleteRecordStore(names[i]);

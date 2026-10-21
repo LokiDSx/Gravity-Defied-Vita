@@ -7,6 +7,7 @@
 #include "utils/Time.h"
 #include "lcdui/CanvasImpl.h"
 #include "rms/RecordStore.h"
+#include "ModsManager.h"
 
 bool Micro::field_249 = false;
 int Micro::gameLoadingStateStage = 0;
@@ -45,7 +46,7 @@ int64_t Micro::goLoadingStep()
     int64_t startTimeMillis = Time::currentTimeMillis();
     switch (gameLoadingStateStage) {
     case 1:
-        levelLoader = new LevelLoader(mrgFilePath);
+        levelLoader = new LevelLoader(mrgFilePath.empty() ? ModsManager::getMrgPath() : mrgFilePath);
         break;
     case 2:
         gamePhysics = new GamePhysics(levelLoader);
@@ -143,6 +144,22 @@ void Micro::destroyApp(bool var1)
     menuManager->saveSmthToRecordStoreAndCloseIt();
 }
 
+void Micro::applyMod(int modIndex)
+{
+    if (!ModsManager::setModByIndex(modIndex)) {
+        return;
+    }
+
+    bool ok = levelLoader->loadFrom(ModsManager::getMrgPath());
+    if (!ok) {
+        ModsManager::setModByIndex(0);
+        levelLoader->loadFrom({});
+        menuManager->showAlert("Mods", "Failed to open levels.mrg for this mod.", nullptr);
+    }
+
+    menuManager->onModSwitched();
+}
+
 void Micro::startApp(int argc, char** argv)
 {
     if (argc > 1) {
@@ -157,6 +174,7 @@ void Micro::startApp(int argc, char** argv)
     }
 
     RecordStore::setRecordStoreDir(argv[0]);
+    ModsManager::init(argv[0]);
 
     field_249 = true;
     // if (thread == null) {
@@ -280,14 +298,17 @@ void Micro::run()
         try {
             gamePhysics->method_53();
             int64_t var1;
-            if ((var1 = Time::currentTimeMillis()) - var3 < 30L) {
+            // 33ms = exactly 2 vblanks of the 60Hz Vita display. A 30ms cadence
+            // drifts against the vblank grid and makes every frame alternate
+            // between 16.7ms and 33.3ms on screen (visible flicker/frame dupes).
+            if ((var1 = Time::currentTimeMillis()) - var3 < 33L) {
                 // try {
                 //     synchronized (this) {
                 //         wait(Math.max(30L - (var1 - var3), 1L));
                 //     }
                 // } catch (InterruptedException var11) {
                 // }
-                Time::sleep(std::max(30LL - (var1 - var3), 1LL));
+                Time::sleep(std::max(33LL - (var1 - var3), 1LL));
 
                 var3 = Time::currentTimeMillis();
             } else {
@@ -340,14 +361,14 @@ void Micro::goalLoop()
 
         gamePhysics->method_53();
         int64_t var2;
-        if ((var2 = Time::currentTimeMillis()) - var4 < 30L) {
+        if ((var2 = Time::currentTimeMillis()) - var4 < 33L) {
             // try {
             //     synchronized (this) {
             //         wait(Math.max(30L - (var2 - var4), 1L));
             //     }
             // } catch (InterruptedException var14) {
             // }
-            Time::sleep(std::max(30LL - (var2 - var4), 1LL));
+            Time::sleep(std::max(33LL - (var2 - var4), 1LL));
 
             var4 = Time::currentTimeMillis();
         } else {

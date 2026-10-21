@@ -9,6 +9,7 @@
 #include "LevelLoader.h"
 #include "GameMenu.h"
 #include "SettingsStringRender.h"
+#include "ModsManager.h"
 #include "utils/Time.h"
 
 
@@ -39,7 +40,7 @@ void MenuManager::initPart(int var1)
         }
 
         try {
-            recordStore = RecordStore::openRecordStore("GDTRStates", true);
+            recordStore = RecordStore::openRecordStore(ModsManager::getStorePrefix() + "GDTRStates", true);
             isRecordStoreOpened = true;
             return;
         } catch (RecordStoreException& var9) {
@@ -147,6 +148,7 @@ void MenuManager::initPart(int var1)
     case 4: {
         gameMenuMain = new GameMenu("Main", micro, nullptr);
         gameMenuPlay = new GameMenu("Play", micro, gameMenuMain);
+        gameMenuMods = new GameMenu("Mods", micro, gameMenuMain);
         gameMenuOptions = new GameMenu("Options", micro, gameMenuMain);
         gameMenuAbout = new GameMenu("About", micro, gameMenuMain);
         gameMenuHelp = new GameMenu("Help", micro, gameMenuMain);
@@ -173,15 +175,28 @@ void MenuManager::initPart(int var1)
         gameMenuConfirmClear = new GameMenu("Confirm Clear", micro, gameMenuOptions);
         gameMenuConfirmReset = new GameMenu("Confirm Reset", micro, gameMenuConfirmClear);
         taskPlayMenu = new TimerOrMotoPartOrMenuElem("Play Menu", gameMenuPlay, this);
+        taskMods = new TimerOrMotoPartOrMenuElem("Mods", gameMenuMods, this);
         taskOptions = new TimerOrMotoPartOrMenuElem("Options", gameMenuOptions, this);
         taskHelp = new TimerOrMotoPartOrMenuElem("Help", gameMenuHelp, this);
         taskAbout = new TimerOrMotoPartOrMenuElem("About", gameMenuAbout, this);
         settingStringExitGame = new SettingsStringRender("Exit Game", 0, this, std::vector<std::string>(), false, micro, gameMenuMain, true);
         gameMenuMain->addMenuElement(taskPlayMenu);
+        gameMenuMain->addMenuElement(taskMods);
         gameMenuMain->addMenuElement(taskOptions);
         gameMenuMain->addMenuElement(taskHelp);
         gameMenuMain->addMenuElement(taskAbout);
         gameMenuMain->addMenuElement(settingStringExitGame);
+        {
+            std::vector<std::string> packNames;
+            for (const auto& mod : ModsManager::getMods()) {
+                packNames.push_back(mod.name);
+            }
+            trackpackSetting = new SettingsStringRender("Trackpack", ModsManager::getAppliedModIndex(), this, packNames, false, micro, gameMenuMods, false);
+        }
+        taskModsBack = new SettingsStringRender("Back", 0, this, std::vector<std::string>(), false, micro, gameMenuMain, true);
+        addTextRender(gameMenuMods, "Put folders with levels.mrg into the Mods directory to play custom tracks. Progress and highscores are saved separately for every trackpack.");
+        gameMenuMods->addMenuElement(trackpackSetting);
+        gameMenuMods->addMenuElement(taskModsBack);
         settingStringLevel = new SettingsStringRender("Level", field_370, this, field_361, false, micro, gameMenuPlay, false);
         settingsStringTrack = new SettingsStringRender("Track", field_345[field_370], this, levelNames[field_370], false, micro, gameMenuPlay, false);
         settingsStringLeague = new SettingsStringRender("League", field_371, this, leagueNames, false, micro, gameMenuPlay, false);
@@ -517,7 +532,7 @@ void MenuManager::method_201(int var1)
     int64_t currentTimeMillis = Time::currentTimeMillis();
     micro->gameCanvas->isDrawingTime = false;
     int64_t var6 = 0L;
-    int8_t var8 = 50;
+    int8_t var8 = 33;
     micro->gamePhysics->method_53();
     micro->gameToMenu();
 
@@ -545,7 +560,7 @@ void MenuManager::method_201(int var1)
                 var6 = var20;
             }
         } else {
-            var8 = 50;
+            var8 = 33;
             if ((var20 = Time::currentTimeMillis()) - var6 < (int64_t)var8) {
                 // try {
                 //     Object var21;
@@ -864,6 +879,24 @@ void MenuManager::processMenu(IGameMenuElement* menuElement)
                 return;
             }
 
+            if (menuElement == trackpackSetting) {
+                if (trackpackSetting->method_114()) {
+                    trackpackSetting->init();
+                    gameMenuModsList = trackpackSetting->getGameMenu();
+                    method_1(gameMenuModsList, false);
+                    gameMenuModsList->method_83(trackpackSetting->getCurrentOptionPos());
+                } else if (trackpackSetting->getCurrentOptionPos() != ModsManager::getAppliedModIndex()) {
+                    micro->applyMod(trackpackSetting->getCurrentOptionPos());
+                }
+
+                return;
+            }
+
+            if (menuElement == taskModsBack) {
+                method_1(currentGameMenu->getGameMenu(), true);
+                return;
+            }
+
             if (menuElement == settingStringBack) {
                 method_1(currentGameMenu->getGameMenu(), true);
                 return;
@@ -1124,10 +1157,11 @@ int MenuManager::getCountOfRecordStoresWithPrefix(int prefixNumber)
 {
     std::vector<std::string> storeNames = RecordStore::listRecordStores();
     if (recordManager != nullptr && !storeNames.empty()) {
+        std::string prefix = ModsManager::getStorePrefix() + std::to_string(prefixNumber);
         int count = 0;
 
         for (std::size_t i = 0; i < storeNames.size(); ++i) {
-            if (storeNames[i].find(std::to_string(prefixNumber), 0) == 0) {
+            if (storeNames[i].rfind(prefix, 0) == 0) {
                 ++count;
             }
         }
@@ -1136,4 +1170,25 @@ int MenuManager::getCountOfRecordStoresWithPrefix(int prefixNumber)
     } else {
         return 0;
     }
+}
+
+void MenuManager::onModSwitched()
+{
+    initPart(1);
+    initPart(2);
+    initPart(3);
+
+    field_345 = { 0, 0, 0 };
+    settingStringLevel->setCurentOptionPos(field_370);
+    settingStringLevel->setAvailableOptions(field_344);
+    settingsStringTrack->setOptionsList(micro->levelLoader->levelNames[field_370]);
+    settingsStringTrack->setAvailableOptions(field_342[field_370]);
+    settingsStringTrack->setCurentOptionPos(field_345[field_370]);
+    settingsStringLeague->setCurentOptionPos(field_371);
+    settingsStringLeague->setAvailableOptions(availableLeagues);
+    field_354 = field_370;
+    field_355 = field_369;
+
+    micro->restart(false);
+    method_1(gameMenuMain, false);
 }

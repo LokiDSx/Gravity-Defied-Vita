@@ -35,4 +35,5 @@ public:
     static std::vector<TextRender*> makeMultilineTextRenders(std::string text, Micro* micro);
     void setDx(int var1);
     void setDrawSprite(bool isDrawSprite, int spriteNo);
+    int measureWidth(std::shared_ptr<Font> font);
 };

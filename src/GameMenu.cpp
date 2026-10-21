@@ -332,15 +332,58 @@ void GameMenu::render_76(Graphics* graphics)
 
     } else {
         graphics->setColor(0, 0, 0);
-        var2 = field_101;
+
+        // Measure the visible menu block and center it on the screen
+        int blockW = 0;
+        if (field_94 != "") {
+            blockW = font->stringWidth(field_94);
+        }
+        graphics->setFont(font2);
+        for (i = field_105; i < field_106 + 1 && i < static_cast<int>(vector.size()); ++i) {
+            int w = vector[i]->measureWidth(font2);
+            if (w > blockW) {
+                blockW = w;
+            }
+        }
+
+        int menuX = xPos;
+        if (blockW > 0) {
+            menuX = (canvasWidth - blockW) / 2 + micro->gameCanvas->helmetSpriteWidth / 2;
+            if (menuX < xPos) {
+                menuX = xPos;
+            }
+        }
+
+        int blockH = field_101 + (canvasHeight < 100 ? 1 : 4);
+        if (field_94 != "") {
+            blockH += font->getBaselinePosition() + 2;
+        }
+        for (i = field_105; i < field_106 + 1 && i < static_cast<int>(vector.size()); ++i) {
+            if (vector[i]->isNotTextRender()) {
+                blockH += font2->getBaselinePosition() + field_103;
+            } else {
+                blockH += (TextRender::getBaselinePosition() < GameCanvas::spriteSizeY[5] ? GameCanvas::spriteSizeY[5] : TextRender::getBaselinePosition()) + field_103;
+            }
+        }
+
+        int menuY = field_101;
+        if (blockH < canvasHeight) {
+            menuY = (canvasHeight - blockH) / 2;
+            if (menuY < field_101) {
+                menuY = field_101;
+            }
+        }
+
+        int itemX = menuX + (field_104 - xPos);
+        var2 = menuY;
         if (field_94 != "") {
             graphics->setFont(font);
-            graphics->drawString(field_94, xPos, var2, 20);
+            graphics->drawString(field_94, menuX, var2, 20);
             var2 += font->getBaselinePosition() + 2;
         }
 
         if (field_105 > 0) {
-            micro->gameCanvas->drawSprite(graphics, 2, xPos - 3, var2);
+            micro->gameCanvas->drawSprite(graphics, 2, menuX - 3, var2);
         }
 
         if (canvasHeight < 100) {
@@ -354,9 +397,9 @@ void GameMenu::render_76(Graphics* graphics)
         for (i = field_105; i < field_106 + 1; ++i) {
             IGameMenuElement* var4 = vector[i];
             graphics->setColor(0, 0, 0);
-            var4->render(graphics, var2, field_104);
+            var4->render(graphics, var2, itemX);
             if (i == field_95 && var4->isNotTextRender()) {
-                int var5 = xPos - micro->gameCanvas->helmetSpriteWidth / 2;
+                int var5 = menuX - micro->gameCanvas->helmetSpriteWidth / 2;
                 int var6 = var2 + font2->getBaselinePosition() / 2 - micro->gameCanvas->helmetSpriteHeight / 2;
                 graphics->setClip(var5, var6, micro->gameCanvas->helmetSpriteWidth, micro->gameCanvas->helmetSpriteHeight);
                 graphics->drawImage(micro->gameCanvas->helmetImage.get(), var5 - micro->gameCanvas->helmetSpriteWidth * (field_110 % 6), var6 - micro->gameCanvas->helmetSpriteHeight * (field_110 / 6), 20);
@@ -376,11 +419,11 @@ void GameMenu::render_76(Graphics* graphics)
 
         if (static_cast<int>(vector.size()) > field_106 && field_106 != static_cast<int>(vector.size()) - 1) {
             if (GameCanvas::spriteSizeY[3] + var2 > canvasHeight) {
-                micro->gameCanvas->drawSprite(graphics, 3, xPos - 3, canvasHeight - GameCanvas::spriteSizeY[3]);
+                micro->gameCanvas->drawSprite(graphics, 3, menuX - 3, canvasHeight - GameCanvas::spriteSizeY[3]);
                 return;
             }
 
-            micro->gameCanvas->drawSprite(graphics, 3, xPos - 3, var2 - 2);
+            micro->gameCanvas->drawSprite(graphics, 3, menuX - 3, var2 - 2);
         }
     }
 }

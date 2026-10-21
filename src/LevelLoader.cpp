@@ -40,6 +40,31 @@ LevelLoader::LevelLoader(const std::filesystem::path& mrgFilePath)
     method_87();
 }
 
+bool LevelLoader::loadFrom(const std::filesystem::path& mrgFilePath)
+{
+    delete levelFileStream;
+    levelFileStream = nullptr;
+    bool usingRequestedSource = mrgFilePath.string().empty();
+
+    if (!mrgFilePath.string().empty()) {
+        FileStream* fileStream = new FileStream(mrgFilePath, std::ios::in | std::ios::binary);
+        if (fileStream->isOpen()) {
+            levelFileStream = fileStream;
+            usingRequestedSource = true;
+        } else {
+            delete fileStream;
+        }
+    }
+
+    if (levelFileStream == nullptr) {
+        levelFileStream = static_cast<FileStream*>(new EmbedFileStream("levels.mrg"));
+    }
+
+    loadLevels();
+    method_87();
+    return usingRequestedSource;
+}
+
 LevelLoader::~LevelLoader()
 {
     delete levelFileStream;

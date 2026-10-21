@@ -34,6 +34,7 @@ public:
     ~Micro();
 
     void startApp(int argc, char** argv);
+    void applyMod(int modIndex);
 
     void gameToMenu();
     void menuToGame();

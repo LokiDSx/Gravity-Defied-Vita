@@ -49,6 +49,11 @@ public:
     LevelLoader(const std::filesystem::path& mrgFilePath);
     ~LevelLoader();
 
+    // Reloads levels from the given mrg file, or from the embedded
+    // levels.mrg when the path is empty or the file can not be opened.
+    // Returns false when a requested file failed to open.
+    bool loadFrom(const std::filesystem::path& mrgFilePath);
+
     std::string getName(int league, int level);
 
     void method_87();

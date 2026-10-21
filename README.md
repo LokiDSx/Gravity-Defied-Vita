@@ -1,4 +1,4 @@
-# Gravity Defied Cpp
+# Gravity Defied Vita
 
 ![](./screens/demo1.gif)
 
@@ -8,12 +8,42 @@ This is the C++ & SDL2 port of Gravity Defied, which includes all the features o
 
 ***This Project is not associated with Codebrew Software in any fashion. All rights to the original Gravity Defied, it's name, logotype, brand and all that stuff belong to Codebrew Software.***
 
+# PS Vita Port
+
+The game runs natively on the PlayStation Vita at the full 960x544 screen resolution (SDL2 GXM driver), without upscaling or flicker. Save data (settings, progress and highscores) is stored in `ux0:data/GravityDefied`.
+
+### Controls
+
+| Action | Button |
+| --- | --- |
+| Accelerate | ✕ / D-pad Up / R1 / stick up |
+| Brake | □ / D-pad Down |
+| Lean backward / forward | D-pad Left / Right, left stick |
+| **Reverse** | **△ / L1 / |
+| Select in menus | ✕ / △ |
+| Back / pause menu | ○ / Start |
+
+### Reverse gear
+
+Unlike the original game, the bike can drive backwards: hold **△** or **L1/L2** while the game is running.
+
+### Custom tracks (Mods)
+
+The port supports third-party track packs (`levels.mrg` files, the same format as the PSP port):
+
+* Put each mod into its own folder inside `ux0:data/GravityDefied/Mods`, e.g. `Mods/MyPack/levels.mrg` (a `*.mrg` file placed directly in `Mods` also works).
+* In-game go to **Main menu → Mods** and pick the desired trackpack there. The active pack is remembered between launches.
+* Progress (unlocked leagues/tracks) and highscores are saved **separately for every trackpack**, so custom tracks never overwrite the records of the original game.
+
 # Authors
 
 ### Gravity Defied Cpp authors
 * **[rgimad](https://github.com/rgimad)** - idea & coding
 * **[AntonEvmenenko](https://github.com/AntonEvmenenko)** - coding
 * **[Max Logaev](https://github.com/mxlgv)** - coding
+
+### Gravity Defied Vita
+* **[Loki D.S. (Ports Collection)](http://phc.lokilab.ru)** - PS Vita port
 
 ### Codebrew GDTR Authors
 

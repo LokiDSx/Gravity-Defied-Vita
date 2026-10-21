@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -23,6 +24,16 @@ private:
     // void _ellipse(int cx, int cy, int xradius, int yradius);
     void _putpixel(int x, int y);
 
+    struct TextTexture {
+        TTF_Font* ttfFont;
+        SDL_Color color;
+        std::string text;
+        SDL_Texture* texture;
+        int width;
+        int height;
+    };
+    std::vector<TextTexture> textTextures;
+
 public:
     enum Anchors {
         HCENTER = 1,
@@ -34,6 +45,7 @@ public:
         BASELINE = 64
     };
     Graphics(SDL_Renderer* renderer);
+    ~Graphics();
     void drawString(const std::string& s, int x, int y, int anchor);
     void setColor(int r, int g, int b);
     void setFont(std::shared_ptr<Font> font);
@@ -41,6 +53,7 @@ public:
     void setClip(int x, int y, int w, int h);
     void drawChar(char c, int x, int y, int anchor);
     void fillRect(int x, int y, int w, int h);
+    void clear();
     void fillArc(int x, int y, int w, int h, int startAngle, int arcAngle);
     void drawArc(int x, int y, int w, int h, int startAngle, int arcAngle);
     void drawLine(int x1, int y1, int x2, int y2);

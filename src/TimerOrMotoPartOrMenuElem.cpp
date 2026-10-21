@@ -67,3 +67,8 @@ void TimerOrMotoPartOrMenuElem::render(Graphics* graphics, int y, int x)
 {
     graphics->drawString(text, x, y, 20);
 }
+
+int TimerOrMotoPartOrMenuElem::measureWidth(std::shared_ptr<Font> font)
+{
+    return font->stringWidth(text);
+}

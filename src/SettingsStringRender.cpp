@@ -297,3 +297,20 @@ bool SettingsStringRender::method_114()
         return field_147;
     }
 }
+
+int SettingsStringRender::measureWidth(std::shared_ptr<Font> font)
+{
+    int w;
+    if (useColon) {
+        w = font->stringWidth(text);
+        if (hasSprite) {
+            w += GameCanvas::spriteSizeX[8] + 3;
+        }
+    } else {
+        w = font->stringWidth(text) + 2 + font->stringWidth(selectedOptionName);
+        if (currentOptionPos > maxAvailableOption && !field_146) {
+            w += GameCanvas::spriteSizeX[9] + 1;
+        }
+    }
+    return w;
+}

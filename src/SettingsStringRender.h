@@ -52,4 +52,5 @@ public:
     void processMenu(IGameMenuElement* var1);
     std::vector<SettingsStringRender*> getSettingsStringRenders();
     bool method_114();
+    int measureWidth(std::shared_ptr<Font> font);
 };

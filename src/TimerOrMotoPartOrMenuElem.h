@@ -38,4 +38,5 @@ public:
     void menuElemMethod(int var1);
     void setGameMenu(GameMenu* gameMenu);
     void render(Graphics* graphics, int y, int x);
+    int measureWidth(std::shared_ptr<Font> font);
 };

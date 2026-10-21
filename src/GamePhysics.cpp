@@ -17,6 +17,7 @@ GamePhysics::GamePhysics(LevelLoader* levelLoader)
     isRenderMotoWithSprites = false;
     isInputAcceleration = false;
     isInputBreak = false;
+    isInputReverse = false;
     isInputBack = false;
     isInputForward = false;
     isInputUp = false;
@@ -274,14 +275,18 @@ void GamePhysics::setRenderMinMaxX(int minX, int maxX)
 void GamePhysics::processPointerReleased()
 {
     isInputUp = isInputDown = isInputRight = isInputLeft = false;
+    isInputReverse = false;
 }
 
 void GamePhysics::method_30(int var1, int var2)
 {
     if (!isGenerateInputAI) {
         isInputUp = isInputDown = isInputRight = isInputLeft = false;
+        isInputReverse = false;
         if (var1 > 0) {
             isInputUp = true;
+        } else if (var1 <= -2) {
+            isInputReverse = true;
         } else if (var1 < 0) {
             isInputDown = true;
         }
@@ -354,6 +359,10 @@ void GamePhysics::method_35()
             if (field_29[2]->motoComponents[index01]->field_384 < 6553) {
                 field_29[2]->motoComponents[index01]->field_384 = 0;
             }
+        }
+
+        if (isInputReverse && !isInputBreak && field_31 <= motoParam4 / 2) {
+            field_31 += motoParam5;
         }
 
         field_29[0]->field_259 = (int)(11915L * (int64_t)field_14 >> 16);
@@ -473,6 +482,12 @@ int GamePhysics::updatePhysics()
     isInputForward = isInputRight;
     if (isGenerateInputAI) {
         setInputFromAI();
+    }
+
+    // Reverse acts as brake while the back wheel is still spinning forward;
+    // once it slows down, reverse torque is applied instead.
+    if (isInputReverse && field_29[2]->motoComponents[index01]->field_384 < -6553) {
+        isInputBreak = true;
     }
 
     GameCanvas::method_151();

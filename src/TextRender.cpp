@@ -105,3 +105,14 @@ void TextRender::setDrawSprite(bool isDrawSprite, int spriteNo)
     this->isDrawSprite = isDrawSprite;
     this->spriteNo = spriteNo;
 }
+
+int TextRender::measureWidth(std::shared_ptr<Font> font)
+{
+    (void)font;
+    std::shared_ptr<Font> useFont = this->font ? this->font : defaultFont;
+    int w = useFont->stringWidth(text) + dx;
+    if (isDrawSprite) {
+        w += GameCanvas::spriteSizeX[spriteNo];
+    }
+    return w;
+}

@@ -8,23 +8,76 @@ Graphics::Graphics(SDL_Renderer* renderer)
     this->font = nullptr;
 }
 
+Graphics::~Graphics()
+{
+    for (auto& entry : textTextures) {
+        if (entry.texture) {
+            SDL_DestroyTexture(entry.texture);
+        }
+    }
+}
+
 void Graphics::drawString(const std::string& s, int x, int y, int anchor)
 {
-    SDL_Surface* surfaceMessage = TTF_RenderText_Blended(font->getTtfFont(), s.c_str(), currentColor);
-    SDL_Texture* message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+    // Creating a texture from scratch for every string on every frame is far too
+    // slow on the Vita, so rendered strings are cached and reused.
+    static constexpr size_t maxCachedTexts = 128;
 
-    int width, height;
-    if (TTF_SizeText(font->getTtfFont(), s.c_str(), &width, &height) == -1)
-        throw std::runtime_error(TTF_GetError());
+    SDL_Texture* texture = nullptr;
+    int width = 0;
+    int height = 0;
+
+    auto it = textTextures.end();
+    for (auto i = textTextures.begin(); i != textTextures.end(); ++i) {
+        const TextTexture& entry = *i;
+        if (entry.ttfFont == font->getTtfFont()
+            && entry.text == s
+            && entry.color.r == currentColor.r
+            && entry.color.g == currentColor.g
+            && entry.color.b == currentColor.b
+            && entry.color.a == currentColor.a) {
+            it = i;
+            break;
+        }
+    }
+
+    if (it != textTextures.end()) {
+        if (it + 1 != textTextures.end()) {
+            TextTexture entry = *it;
+            textTextures.erase(it);
+            textTextures.push_back(entry);
+        }
+        const TextTexture& entry = textTextures.back();
+        texture = entry.texture;
+        width = entry.width;
+        height = entry.height;
+    } else {
+        SDL_Surface* surfaceMessage = TTF_RenderText_Blended(font->getTtfFont(), s.c_str(), currentColor);
+        if (!surfaceMessage) {
+            return;
+        }
+
+        texture = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+        width = surfaceMessage->w;
+        height = surfaceMessage->h;
+        SDL_FreeSurface(surfaceMessage);
+        if (!texture) {
+            return;
+        }
+
+        if (textTextures.size() >= maxCachedTexts) {
+            SDL_DestroyTexture(textTextures.front().texture);
+            textTextures.erase(textTextures.begin());
+        }
+
+        textTextures.push_back({ font->getTtfFont(), currentColor, s, texture, width, height });
+    }
 
     x = getAnchorX(x, width, anchor);
     y = getAnchorY(y, height, anchor);
     SDL_Rect dstRect { x, y, width, height };
 
-    SDL_RenderCopy(renderer, message, nullptr, &dstRect);
-
-    SDL_FreeSurface(surfaceMessage);
-    SDL_DestroyTexture(message);
+    SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
 }
 
 void Graphics::setColor(int r, int g, int b)
@@ -61,6 +114,11 @@ void Graphics::fillRect(int x, int y, int w, int h)
 {
     SDL_Rect rect { x, y, w, h };
     SDL_RenderFillRect(renderer, &rect);
+}
+
+void Graphics::clear()
+{
+    SDL_RenderClear(renderer);
 }
 
 /**
@@ -235,12 +293,11 @@ void Graphics::drawLine(int x1, int y1, int x2, int y2)
 
 void Graphics::drawImage(Image* const image, int x, int y, int anchor)
 {
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image->getSurface());
+    SDL_Texture* texture = image->getTexture(renderer);
     x = getAnchorX(x, image->getWidth(), anchor);
     y = getAnchorY(y, image->getHeight(), anchor);
     SDL_Rect dstRect { x, y, image->getWidth(), image->getHeight() };
     SDL_RenderCopy(renderer, texture, 0, &dstRect);
-    SDL_DestroyTexture(texture);
 }
 
 int Graphics::getAnchorX(int x, int size, int anchor)
