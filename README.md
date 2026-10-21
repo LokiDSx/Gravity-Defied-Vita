@@ -1,6 +1,6 @@
 # Gravity Defied Vita
 
-![](./screens/demo1.gif)
+![](./screens/bg.png)
 
 **Gravity Defied** is a legendary mototrial racing mobile game. It was originally developed by Codebrew Software in 2004 for J2ME platform.
 
@@ -16,16 +16,16 @@ The game runs natively on the PlayStation Vita at the full 960x544 screen resolu
 
 | Action | Button |
 | --- | --- |
-| Accelerate | ✕ / D-pad Up / R1 / stick up |
+| Accelerate | ✕ / D-pad Up / R / stick up |
 | Brake | □ / D-pad Down |
 | Lean backward / forward | D-pad Left / Right, left stick |
-| **Reverse** | **△ / L1 / |
-| Select in menus | ✕ / △ |
+| **Reverse** | **△ / L / |
+| Select in menus | ✕ |
 | Back / pause menu | ○ / Start |
 
 ### Reverse gear
 
-Unlike the original game, the bike can drive backwards: hold **△** or **L1/L2** while the game is running.
+Unlike the original game, the bike can drive backwards: hold **△** or **L1** while the game is running.
 
 ### Custom tracks (Mods)
 
