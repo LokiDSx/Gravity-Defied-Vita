@@ -23,6 +23,14 @@ The game runs natively on the PlayStation Vita at the full 960x544 screen resolu
 | Select in menus | ✕ |
 | Back / pause menu | ○ / Start |
 
+### Dark theme
+
+The Options menu has a **Dark theme** toggle: dark background, blue tracks and white lines instead of the classic white/green look. The setting is saved together with the other options.
+
+### Zoom
+
+The Options menu has a **Zoom** submenu: *Off*, *15%*, *30%*. It scales the in-game view (bike, tracks and camera) so the action is easier to follow on the Vita screen; HUD and menus stay at the native size. The choice is saved together with the other options.
+
 ### Reverse gear
 
 Unlike the original game, the bike can drive backwards: hold **△** or **L1** while the game is running.
