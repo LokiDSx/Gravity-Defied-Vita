@@ -48,6 +48,7 @@ public:
     ~Graphics();
     void drawString(const std::string& s, int x, int y, int anchor);
     void setColor(int r, int g, int b);
+    void setScale(float s);
     void setFont(std::shared_ptr<Font> font);
     std::shared_ptr<Font> getFont() const;
     void setClip(int x, int y, int w, int h);

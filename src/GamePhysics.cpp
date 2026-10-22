@@ -3,6 +3,7 @@
 #include "LevelLoader.h"
 #include "class_10.h"
 #include "MathF16.h"
+#include "Theme.h"
 #include <algorithm>
 
 GamePhysics::GamePhysics(LevelLoader* levelLoader)
@@ -931,7 +932,8 @@ void GamePhysics::renderEngine(GameCanvas* gameCanvas, int var2, int var3)
 
 void GamePhysics::renderMotoFork(GameCanvas* canvas)
 {
-    canvas->setColor(128, 128, 128);
+    Theme::Color fork = Theme::forkGrey();
+    canvas->setColor(fork.r, fork.g, fork.b);
     canvas->drawLineF16(motoComponents[3]->xF16, motoComponents[3]->yF16, motoComponents[1]->xF16, motoComponents[1]->yF16);
 }
 
@@ -960,7 +962,10 @@ void GamePhysics::renderWheelSpokes(GameCanvas* gameCanvas)
     int var2;
     int xxxF16 = (int)((int64_t)(var2 = field_29[1]->field_257) * 58982L >> 16);
     int yyyF16 = (int)((int64_t)var2 * 45875L >> 16);
-    gameCanvas->setColor(0, 0, 0);
+    {
+        Theme::Color c = Theme::hudText();
+        gameCanvas->setColor(c.r, c.g, c.b);
+    }
     if (Micro::isInGameMenu) {
         gameCanvas->drawCircle(motoComponents[1]->xF16 << 2 >> 16, motoComponents[1]->yF16 << 2 >> 16, (var2 + var2) << 2 >> 16);
         gameCanvas->drawCircle(motoComponents[1]->xF16 << 2 >> 16, motoComponents[1]->yF16 << 2 >> 16, (xxxF16 + xxxF16) << 2 >> 16);
@@ -1126,19 +1131,27 @@ void GamePhysics::renderSmth(GameCanvas* gameCanvas, int var2, int var3, int var
 
         gameCanvas->drawHelmet(circleXF16 << 2 >> 16, circleYF16 << 2 >> 16, var30);
     } else {
-        gameCanvas->setColor(0, 0, 0);
+        {
+            Theme::Color c = Theme::hudText();
+            gameCanvas->setColor(c.r, c.g, c.b);
+        }
         gameCanvas->drawLineF16(xF16, yF16, x2F16, y2F16);
         gameCanvas->drawLineF16(x2F16, y2F16, x3F16, y3F16);
-        gameCanvas->setColor(0, 0, 128);
+        Theme::Color darkBlue = Theme::lineDarkBlue();
+        gameCanvas->setColor(darkBlue.r, darkBlue.g, darkBlue.b);
         gameCanvas->drawLineF16(x3F16, y3F16, x4F16, y4F16);
         gameCanvas->drawLineF16(x4F16, y4F16, x5F16, y5F16);
         gameCanvas->drawLineF16(x5F16, y5F16, x6F16, y6F16);
         int var30 = 65536;
-        gameCanvas->setColor(156, 0, 0);
+        Theme::Color darkRed = Theme::lineDarkRed();
+        gameCanvas->setColor(darkRed.r, darkRed.g, darkRed.b);
         gameCanvas->drawCircle(circleXF16 << 2 >> 16, circleYF16 << 2 >> 16, (var30 + var30) << 2 >> 16);
     }
 
-    gameCanvas->setColor(0, 0, 0);
+    {
+        Theme::Color c = Theme::hudText();
+        gameCanvas->setColor(c.r, c.g, c.b);
+    }
     gameCanvas->drawForthSpriteByCenter(x6F16 << 2 >> 16, y6F16 << 2 >> 16);
     gameCanvas->drawForthSpriteByCenter(var14 << 2 >> 16, var15 << 2 >> 16);
 }
@@ -1175,7 +1188,8 @@ void GamePhysics::renderMotoAsLines(GameCanvas* gameCanvas, int var2, int var3, 
     int var34 = var32 + (int)((int64_t)var5 * 32768L >> 16);
     int var35 = var31 + (int)((int64_t)var4 * 114688L >> 16) - (int)((int64_t)var2 * 32768L >> 16);
     int var36 = var32 + (int)((int64_t)var5 * 114688L >> 16) - (int)((int64_t)var3 * 32768L >> 16);
-    gameCanvas->setColor(50, 50, 50);
+    Theme::Color frameGrey = Theme::lineGrey();
+    gameCanvas->setColor(frameGrey.r, frameGrey.g, frameGrey.b);
     gameCanvas->drawCircle(var21 << 2 >> 16, var22 << 2 >> 16, (32768 + 32768) << 2 >> 16);
     if (!field_35) {
         gameCanvas->drawLineF16(var9, var10, var17, var18);
@@ -1235,9 +1249,11 @@ void GamePhysics::renderGame(GameCanvas* gameCanvas)
 
     renderWheelSpokes(gameCanvas);
     if (isRenderMotoWithSprites) {
-        gameCanvas->setColor(170, 0, 0);
+        Theme::Color hub = Theme::lineDeepRed();
+        gameCanvas->setColor(hub.r, hub.g, hub.b);
     } else {
-        gameCanvas->setColor(50, 50, 50);
+        Theme::Color frameGrey = Theme::lineGrey();
+        gameCanvas->setColor(frameGrey.r, frameGrey.g, frameGrey.b);
     }
 
     gameCanvas->method_142(motoComponents[1]->xF16 << 2 >> 16, motoComponents[1]->yF16 << 2 >> 16, const175_1_half[0] << 2 >> 16, MathF16::atan2F16(xxF16, yyF16));

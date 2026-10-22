@@ -10,6 +10,7 @@
 #include "GameMenu.h"
 #include "SettingsStringRender.h"
 #include "ModsManager.h"
+#include "Theme.h"
 #include "utils/Time.h"
 
 
@@ -27,15 +28,16 @@ void MenuManager::initPart(int var1)
         field_341 = defaultInputString;
         field_374 = { "On", "Off" };
         field_375 = { "Keyset 1", "Keyset 2", "Keyset 3" };
+        zoomOptions = { "Off", "15%", "30%" };
         recordManager = new RecordManager();
         field_337 = -1L;
         field_338 = -1;
         field_339 = -1;
         field_340.clear();
         isRecordStoreOpened = false;
-        field_278 = std::vector<int8_t>(19);
+        field_278 = std::vector<int8_t>(21);
 
-        for (int var11 = 0; var11 < 19; ++var11) {
+        for (int var11 = 0; var11 < 20; ++var11) {
             field_278[var11] = -127;
         }
 
@@ -67,7 +69,7 @@ void MenuManager::initPart(int var1)
                 return;
             }
 
-            if (var3.size() <= 19) {
+            if (var3.size() <= 21) {
                 for (std::size_t i = 0; i < var3.size(); ++i) {
                     field_278[i] = var3[i];
                 }
@@ -110,6 +112,11 @@ void MenuManager::initPart(int var1)
         field_370 = method_217(10, field_370);
         field_371 = method_217(12, field_371);
         field_373 = method_217(15, field_373);
+        isDarkTheme = method_217(19, isDarkTheme);
+        Theme::setMode(isDarkTheme == 1 ? Theme::Mode::Night : Theme::Mode::Day);
+        micro->gameCanvas->reloadUiSprites();
+        zoomMode = method_217(20, zoomMode);
+        micro->gameCanvas->setZoomMode(zoomMode);
         field_354 = field_370;
         field_355 = field_369;
 
@@ -225,6 +232,10 @@ void MenuManager::initPart(int var1)
         bikeSpriteSetting = new SettingsStringRender("Bike sprite", isDisabledBikeSprite, this, field_374, true, micro, gameMenuOptions, false);
         inputSetting = new SettingsStringRender("Input", field_367, this, field_375, false, micro, gameMenuOptions, false);
         lookAheadSetting = new SettingsStringRender("Look ahead", isDisableLookAhead, this, field_374, true, micro, gameMenuOptions, false);
+        // SettingsStringRender On/Off mode: position 0 shows "On", position 1 shows "Off".
+        // Dark theme: On = night, Off = day.
+        themeSetting = new SettingsStringRender("Dark theme", isDarkTheme == 1 ? 0 : 1, this, field_374, true, micro, gameMenuOptions, false);
+        zoomSetting = new SettingsStringRender("Zoom", zoomMode, this, zoomOptions, false, micro, gameMenuOptions, false);
         clearHighscoreSetting = new TimerOrMotoPartOrMenuElem("Clear highscore", gameMenuConfirmClear, this);
         return;
     case 6:
@@ -234,6 +245,8 @@ void MenuManager::initPart(int var1)
         gameMenuOptions->addMenuElement(bikeSpriteSetting);
         gameMenuOptions->addMenuElement(inputSetting);
         gameMenuOptions->addMenuElement(lookAheadSetting);
+        gameMenuOptions->addMenuElement(themeSetting);
+        gameMenuOptions->addMenuElement(zoomSetting);
         gameMenuOptions->addMenuElement(clearHighscoreSetting);
         gameMenuOptions->addMenuElement(settingStringBack);
         field_315 = new SettingsStringRender("No", 0, this, std::vector<std::string>(), false, micro, gameMenuMain, true);
@@ -297,7 +310,13 @@ void MenuManager::initPart(int var1)
         gameMenuOptions2->addMenuElement(field_376.get());
         addTextRender(gameMenuOptions2, "Look ahead: On/Off");
         addTextRender(gameMenuOptions2, "Default: <On>. Turns on and off smart camera movement.");
-        gameMenuOptions2->addMenuElement(field_376.get());
+
+        addTextRender(gameMenuOptions2, "Dark theme: On/Off");
+        addTextRender(gameMenuOptions2, "Default: <Off>. Turns on and off the dark color theme: dark background, blue tracks and white lines.");
+
+        addTextRender(gameMenuOptions2, "Zoom: Off/15%/30%");
+        addTextRender(gameMenuOptions2, "Default: <Off>. Zooms the game view in by 15% or 30% for a bigger picture.");
+
         addTextRender(gameMenuOptions2, "Clear highscore");
         addTextRender(gameMenuOptions2, "Lets you clear the highscores. Here you can also do a \"Full Reset\" which will reset the game to original state (clear settings, highscores, unlocked levels and leagues).");
         gameMenuOptions2->addMenuElement(field_376.get());
@@ -357,6 +376,51 @@ bool MenuManager::method_196()
     }
 }
 
+void MenuManager::updateProgressAndSave()
+{
+    field_356 = false;
+    lastUnlockedLeague = -1;
+    if (settingsStringTrack->getMaxAvailableOptionPos() >= settingsStringTrack->getCurrentOptionPos()) {
+        settingsStringTrack->setAvailableOptions(settingsStringTrack->getCurrentOptionPos() + 1 < field_342[settingStringLevel->getCurrentOptionPos()] ? field_342[settingStringLevel->getCurrentOptionPos()] : settingsStringTrack->getCurrentOptionPos() + 1);
+        field_342[settingStringLevel->getCurrentOptionPos()] = (int8_t)settingsStringTrack->getMaxAvailableOptionPos() < field_342[settingStringLevel->getCurrentOptionPos()] ? field_342[settingStringLevel->getCurrentOptionPos()] : (int8_t)settingsStringTrack->getMaxAvailableOptionPos();
+    }
+
+    if (settingsStringTrack->getCurrentOptionPos() == settingsStringTrack->getMaxOptionPos()) {
+        field_356 = true;
+        switch (settingStringLevel->getCurrentOptionPos()) {
+        case 0:
+            if (availableLeagues < 1) {
+                availableLeagues = 1;
+                lastUnlockedLeague = 1;
+                settingsStringLeague->setAvailableOptions(availableLeagues);
+            }
+            break;
+        case 1:
+            if (availableLeagues < 2) {
+                availableLeagues = 2;
+                lastUnlockedLeague = 2;
+                settingsStringLeague->setAvailableOptions(availableLeagues);
+            }
+            break;
+        case 2:
+            if (availableLeagues < 3) {
+                availableLeagues = 3;
+                lastUnlockedLeague = 3;
+                settingsStringLeague->setOptionsList(leagueNamesAll4);
+                leagueNames = leagueNamesAll4;
+                settingsStringLeague->setAvailableOptions(availableLeagues);
+            }
+        }
+
+        settingStringLevel->setAvailableOptions(settingStringLevel->getMaxAvailableOptionPos() + 1);
+        if (field_342[settingStringLevel->getMaxAvailableOptionPos()] == -1) {
+            field_342[settingStringLevel->getMaxAvailableOptionPos()] = 0;
+        }
+    }
+
+    method_208();
+}
+
 void MenuManager::method_197()
 {
     recordManager->method_17(settingsStringLeague->getCurrentOptionPos(), field_341, field_337);
@@ -373,44 +437,6 @@ void MenuManager::method_197()
     }
 
     recordManager->closeRecordStore();
-    int8_t availableLeagues = -1;
-    if (settingsStringTrack->getMaxAvailableOptionPos() >= settingsStringTrack->getCurrentOptionPos()) {
-        settingsStringTrack->setAvailableOptions(settingsStringTrack->getCurrentOptionPos() + 1 < field_342[settingStringLevel->getCurrentOptionPos()] ? field_342[settingStringLevel->getCurrentOptionPos()] : settingsStringTrack->getCurrentOptionPos() + 1);
-        field_342[settingStringLevel->getCurrentOptionPos()] = (int8_t)settingsStringTrack->getMaxAvailableOptionPos() < field_342[settingStringLevel->getCurrentOptionPos()] ? field_342[settingStringLevel->getCurrentOptionPos()] : (int8_t)settingsStringTrack->getMaxAvailableOptionPos();
-    }
-
-    if (settingsStringTrack->getCurrentOptionPos() == settingsStringTrack->getMaxOptionPos()) {
-        field_356 = true;
-        switch (settingStringLevel->getCurrentOptionPos()) {
-        case 0:
-            if (availableLeagues < 1) {
-                availableLeagues = 1;
-                availableLeagues = 1;
-                settingsStringLeague->setAvailableOptions(availableLeagues);
-            }
-            break;
-        case 1:
-            if (availableLeagues < 2) {
-                availableLeagues = 2;
-                availableLeagues = 2;
-                settingsStringLeague->setAvailableOptions(availableLeagues);
-            }
-            break;
-        case 2:
-            if (availableLeagues < 3) {
-                availableLeagues = 3;
-                availableLeagues = 3;
-                settingsStringLeague->setOptionsList(leagueNamesAll4);
-                leagueNames = leagueNamesAll4;
-                settingsStringLeague->setAvailableOptions(availableLeagues);
-            }
-        }
-
-        settingStringLevel->setAvailableOptions(settingStringLevel->getMaxAvailableOptionPos() + 1);
-        if (field_342[settingStringLevel->getMaxAvailableOptionPos()] == -1) {
-            field_342[settingStringLevel->getMaxAvailableOptionPos()] = 0;
-        }
-    }
 
     int var3 = getCountOfRecordStoresWithPrefix(settingStringLevel->getCurrentOptionPos());
     addTextRender(gameMenuFinished, var3 + " of " + std::to_string(levelNames[settingStringLevel->getCurrentOptionPos()].size()) + " tracks in " + field_361[settingStringLevel->getCurrentOptionPos()] + " completed.");
@@ -424,13 +450,13 @@ void MenuManager::method_197()
             settingsStringTrack->setAvailableOptions(field_342[settingStringLevel->getCurrentOptionPos()]);
         }
 
-        if (availableLeagues != -1) {
-            addTextRender(gameMenuFinished, "Congratultions! You have successfully unlocked a new league: " + leagueNames[availableLeagues]);
-            if (availableLeagues == 3) {
+        if (lastUnlockedLeague != -1) {
+            addTextRender(gameMenuFinished, "Congratultions! You have successfully unlocked a new league: " + leagueNames[lastUnlockedLeague]);
+            if (lastUnlockedLeague == 3) {
                 gameMenuFinished->addMenuElement(new TextRender("Enjoy...", micro));
             }
 
-            showAlert("League unlocked", "You have successfully unlocked a new league: " + leagueNames[availableLeagues], nullptr);
+            showAlert("League unlocked", "You have successfully unlocked a new league: " + leagueNames[lastUnlockedLeague], nullptr);
         } else {
             bool var4 = true;
 
@@ -492,6 +518,7 @@ void MenuManager::method_201(int var1)
         gameMenuFinished->clearVector();
         field_354 = settingStringLevel->getCurrentOptionPos();
         field_355 = settingsStringTrack->getCurrentOptionPos();
+        updateProgressAndSave();
         recordManager->method_8(settingStringLevel->getCurrentOptionPos(), settingsStringTrack->getCurrentOptionPos());
         int var2 = recordManager->getPosOfNewRecord(settingsStringLeague->getCurrentOptionPos(), field_337);
         field_340 = timeToString(field_337);
@@ -774,6 +801,8 @@ void MenuManager::method_208()
     setValue(3, (int8_t)bikeSpriteSetting->getCurrentOptionPos());
     setValue(14, (int8_t)inputSetting->getCurrentOptionPos());
     setValue(4, (int8_t)lookAheadSetting->getCurrentOptionPos());
+    setValue(19, isDarkTheme);
+    setValue(20, zoomMode);
     setValue(5, (int8_t)settingsStringLeague->getMaxAvailableOptionPos());
     setValue(6, (int8_t)settingStringLevel->getMaxAvailableOptionPos());
     setValue(10, (int8_t)settingStringLevel->getCurrentOptionPos());
@@ -786,13 +815,13 @@ void MenuManager::method_208()
 
     if (recorcStoreRecordId == -1) {
         try {
-            recorcStoreRecordId = recordStore->addRecord(field_278, 0, 19);
+            recorcStoreRecordId = recordStore->addRecord(field_278, 0, 21);
         } catch (RecordStoreNotOpenException& var2) {
         } catch (RecordStoreException& var3) {
         }
     } else {
         try {
-            recordStore->setRecord(recorcStoreRecordId, field_278, 0, 19);
+            recordStore->setRecord(recorcStoreRecordId, field_278, 0, 21);
         } catch (RecordStoreNotOpenException& var4) {
         } catch (RecordStoreException& var5) {
         }
@@ -858,6 +887,21 @@ void MenuManager::processMenu(IGameMenuElement* menuElement)
 
             if (menuElement == lookAheadSetting) {
                 micro->gamePhysics->setEnableLookAhead(lookAheadSetting->getCurrentOptionPos() == 0);
+                return;
+            }
+
+            if (menuElement == themeSetting) {
+                isDarkTheme = themeSetting->getCurrentOptionPos() == 0 ? 1 : 0;
+                Theme::setMode(isDarkTheme == 1 ? Theme::Mode::Night : Theme::Mode::Day);
+                micro->gameCanvas->reloadUiSprites();
+                method_208();
+                return;
+            }
+
+            if (menuElement == zoomSetting) {
+                zoomMode = (int8_t)zoomSetting->getCurrentOptionPos();
+                micro->gameCanvas->setZoomMode(zoomMode);
+                method_208();
                 return;
             }
 
@@ -1120,6 +1164,12 @@ void MenuManager::exit()
     driverSpriteSetting->setCurentOptionPos(0);
     bikeSpriteSetting->setCurentOptionPos(0);
     lookAheadSetting->setCurentOptionPos(0);
+    themeSetting->setCurentOptionPos(1);
+    isDarkTheme = 0;
+    Theme::setMode(Theme::Mode::Day);
+    zoomSetting->setCurentOptionPos(0);
+    zoomMode = 0;
+    micro->gameCanvas->setZoomMode(0);
     settingsStringLeague->setCurentOptionPos(0);
     settingsStringLeague->setAvailableOptions(0);
     settingStringLevel->setCurentOptionPos(0);

@@ -79,3 +79,33 @@ SDL_Texture* Image::getTexture(SDL_Renderer* renderer)
 
     return this->texture;
 }
+
+void Image::invertLuminance()
+{
+    if (!this->surface) {
+        return;
+    }
+
+    if (SDL_MUSTLOCK(this->surface)) {
+        SDL_LockSurface(this->surface);
+    }
+
+    for (int y = 0; y < this->surface->h; ++y) {
+        Uint8* row = static_cast<Uint8*>(this->surface->pixels) + y * this->surface->pitch;
+        for (int x = 0; x < this->surface->w; ++x) {
+            Uint8* px = row + x * 4;
+            px[0] = static_cast<Uint8>(255 - px[0]);
+            px[1] = static_cast<Uint8>(255 - px[1]);
+            px[2] = static_cast<Uint8>(255 - px[2]);
+        }
+    }
+
+    if (SDL_MUSTLOCK(this->surface)) {
+        SDL_UnlockSurface(this->surface);
+    }
+
+    if (this->texture) {
+        SDL_DestroyTexture(this->texture);
+        this->texture = nullptr;
+    }
+}

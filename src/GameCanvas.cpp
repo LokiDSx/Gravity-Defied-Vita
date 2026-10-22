@@ -2,6 +2,7 @@
 #include "MathF16.h"
 #include "GamePhysics.h"
 #include "MenuManager.h"
+#include "Theme.h"
 #include "lcdui/Image.h"
 #include "lcdui/FontStorage.h"
 #include "utils/Time.h"
@@ -118,11 +119,28 @@ void GameCanvas::method_129()
     method_164();
 }
 
+void GameCanvas::setZoomMode(int mode)
+{
+    zoomMode = mode;
+}
+
+float GameCanvas::getZoomScale() const
+{
+    switch (zoomMode) {
+    case 1:
+        return 1.15f;
+    case 2:
+        return 1.30f;
+    default:
+        return 1.0f;
+    }
+}
+
 void GameCanvas::setViewPosition(int dx, int dy)
 {
     this->dx = dx;
     this->dy = dy;
-    gamePhysics->setRenderMinMaxX(-dx, -dx + width);
+    gamePhysics->setRenderMinMaxX(-dx, -dx + (int)(width / getZoomScale()));
 }
 
 int GameCanvas::getDx()
@@ -251,11 +269,13 @@ void GameCanvas::drawTime(int64_t time10Ms)
     }
 
     if (time10Ms > 3600000L) {
-        setColor(0, 0, 0);
+        Theme::Color c = Theme::hudText();
+        setColor(c.r, c.g, c.b);
         graphics->drawString("0:00.", width - defaultFontWidth00, height2 - 5, 40);
         graphics->drawString("00", width - defaultFontWidth00, height2 - 5, 36);
     } else {
-        setColor(0, 0, 0);
+        Theme::Color c = Theme::hudText();
+        setColor(c.r, c.g, c.b);
         graphics->drawString(stringWithTime, width - defaultFontWidth00, height2 - 5, 40);
         graphics->drawString(time10MsToStringCache[time10MsPart], width - defaultFontWidth00, height2 - 5, 36);
     }
@@ -281,7 +301,8 @@ void GameCanvas::renderStartFlag(int x, int y)
         flagAnimationTime = 0;
     }
 
-    setColor(0, 0, 0);
+    Theme::Color c = Theme::hudText();
+    setColor(c.r, c.g, c.b);
     drawLine(x, y, x, y + 32);
     drawSprite(graphics, startFlagAnimationTimeToSpriteNo[flagAnimationTime >> 16], addDx(x), addDy(y) - 32);
 }
@@ -292,7 +313,8 @@ void GameCanvas::renderFinishFlag(int x, int y)
         flagAnimationTime = 0;
     }
 
-    setColor(0, 0, 0);
+    Theme::Color c = Theme::hudText();
+    setColor(c.r, c.g, c.b);
     drawLine(x, y, x, y + 32);
     drawSprite(graphics, finishFlagAnumationTimeToSpriteNo[flagAnimationTime >> 16], addDx(x), addDy(y) - 32);
 }
@@ -356,8 +378,19 @@ void GameCanvas::renderFender(int x, int y, int angleF16)
 
 void GameCanvas::clearScreenWithWhite()
 {
-    graphics->setColor(255, 255, 255);
+    Theme::Color c = Theme::background();
+    graphics->setColor(c.r, c.g, c.b);
     graphics->clear();
+}
+
+void GameCanvas::reloadUiSprites()
+{
+    helmetImage = std::make_unique<Image>("helmet.png");
+    spritesImage = std::make_unique<Image>("sprites.png");
+    if (Theme::isNight()) {
+        helmetImage->invertLuminance();
+        spritesImage->invertLuminance();
+    }
 }
 
 void GameCanvas::setColor(int red, int green, int blue)
@@ -414,14 +447,20 @@ void GameCanvas::drawGame(Graphics* g)
             }
 
             gamePhysics->setMotoComponents();
-            setViewPosition(-gamePhysics->getCamPosX() + field_178 + width / 2, gamePhysics->getCamPosY() + field_179 + height2 / 2);
-            gamePhysics->renderGame(this);
+            {
+                float zoomScale = getZoomScale();
+                graphics->setScale(zoomScale);
+                setViewPosition(-gamePhysics->getCamPosX() + field_178 + (int)(width / (2.0f * zoomScale)), gamePhysics->getCamPosY() + field_179 + (int)(height2 / (2.0f * zoomScale)));
+                gamePhysics->renderGame(this);
+                graphics->setScale(1.0f);
+            }
             if (isDrawingTime) {
                 drawTime(micro->gameTimeMs / 10L);
             }
 
             if (!timerMessage.empty()) {
-                setColor(0, 0, 0);
+                Theme::Color c = Theme::hudText();
+                setColor(c.r, c.g, c.b);
                 graphics->setFont(font);
                 if (height2 <= 128) {
                     graphics->drawString(timerMessage, width / 2, 1, 17);
@@ -436,7 +475,10 @@ void GameCanvas::drawGame(Graphics* g)
             }
 
             // print fps to screen
-            setColor(0, 0, 0);
+            {
+                Theme::Color c = Theme::hudText();
+                setColor(c.r, c.g, c.b);
+            }
             graphics->setFont(font);
             graphics->drawString("FPS: " + std::to_string(fps), defaultFontWidth00, height2 - 5, 36);
 
@@ -452,9 +494,11 @@ void GameCanvas::drawGame(Graphics* g)
 void GameCanvas::method_161(int var1, bool mode)
 {
     int h = mode ? height : height2;
-    setColor(0, 0, 0);
+    Theme::Color frame = Theme::progressFrame();
+    setColor(frame.r, frame.g, frame.b);
     graphics->fillRect(1, h - 4, width - 2, 3);
-    setColor(255, 255, 255);
+    Theme::Color fill = Theme::progressFill();
+    setColor(fill.r, fill.g, fill.b);
     graphics->fillRect(2, h - 3, (int)((int64_t)((width - 4) << 16) * (int64_t)var1 >> 16) >> 16, 1);
 }
 

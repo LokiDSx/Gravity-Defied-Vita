@@ -55,6 +55,8 @@ private:
     SettingsStringRender* bikeSpriteSetting;
     SettingsStringRender* inputSetting;
     SettingsStringRender* lookAheadSetting;
+    SettingsStringRender* themeSetting;
+    SettingsStringRender* zoomSetting;
     TimerOrMotoPartOrMenuElem* clearHighscoreSetting;
     TimerOrMotoPartOrMenuElem* field_313;
     SettingsStringRender* field_314;
@@ -105,6 +107,7 @@ private:
     int field_355 = 0;
     bool field_356 = false;
     bool field_357 = false;
+    int8_t lastUnlockedLeague = -1;
     std::vector<std::string> field_361 = { "Easy", "Medium", "Pro" };
     int64_t field_362 = 0L;
     int8_t isDisablePerspective = 0;
@@ -113,6 +116,8 @@ private:
     int8_t isDisabledBikeSprite = 0;
     int8_t field_367 = 0;
     int8_t isDisableLookAhead = 0;
+    int8_t isDarkTheme = 0;
+    int8_t zoomMode = 0;
     int8_t field_369 = 0;
     int8_t field_370 = 0;
     int8_t field_371 = 0;
@@ -120,11 +125,13 @@ private:
     int8_t field_373 = 0;
     std::vector<std::string> field_374;
     std::vector<std::string> field_375;
+    std::vector<std::string> zoomOptions;
     std::unique_ptr<TextRender> field_376;
     // Alert alert = nullptr; // TODO
 
     void addTextRender(GameMenu* gameMenu, std::string text);
     void method_197();
+    void updateProgressAndSave();
     void fillCanvasWithImage(Graphics* graphics);
     void processNonFireKeyCode(int keyCode);
     std::vector<int8_t> method_216(int var1, int8_t var2);

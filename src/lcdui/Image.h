@@ -18,4 +18,5 @@ public:
     int getHeight() const;
     SDL_Surface* getSurface() const;
     SDL_Texture* getTexture(SDL_Renderer* renderer);
+    void invertLuminance();
 };

@@ -1,6 +1,7 @@
 #include "LevelLoader.h"
 #include "utils/FileStream.h"
 #include "utils/EmbedFileStream.h"
+#include "Theme.h"
 
 #include <climits>
 #include <algorithm>
@@ -211,7 +212,8 @@ void LevelLoader::setMinMaxX(int minX, int maxX)
 void LevelLoader::renderLevel3D(GameCanvas* gameCanvas, int xF16, int yF16)
 {
     if (gameCanvas != nullptr) {
-        gameCanvas->setColor(0, 170, 0);
+        Theme::Color track = Theme::trackLine();
+        gameCanvas->setColor(track.r, track.g, track.b);
         xF16 >>= 1;
         yF16 >>= 1;
         gameLevel->renderLevel3D(gameCanvas, xF16, yF16);
@@ -220,7 +222,8 @@ void LevelLoader::renderLevel3D(GameCanvas* gameCanvas, int xF16, int yF16)
 
 void LevelLoader::renderTrackNearestLine(GameCanvas* canvas)
 {
-    canvas->setColor(0, 255, 0);
+    Theme::Color nearest = Theme::nearestLine();
+    canvas->setColor(nearest.r, nearest.g, nearest.b);
     gameLevel->renderTrackNearestGreenLine(canvas);
 }
 

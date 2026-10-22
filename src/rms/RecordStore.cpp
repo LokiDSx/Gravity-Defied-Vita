@@ -125,7 +125,7 @@ void RecordStore::log(std::string s)
 void RecordStore::setRecordStoreDir([[maybe_unused]] const char* progName)
 {
 #ifdef VITA_PORT
-    recordStoreDir = std::filesystem::path("ux0:data") / "GravityDefied";
+    recordStoreDir = std::filesystem::path("ux0:data") / "GravityDefied" / "Saves";
 #elif defined(WIN32)
     const char* base = dirname(strdup(progName));
     recordStoreDir = std::filesystem::path(base) / "recordStore";

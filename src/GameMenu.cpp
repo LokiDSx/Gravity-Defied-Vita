@@ -5,6 +5,7 @@
 #include "IGameMenuElement.h"
 #include "GameCanvas.h"
 #include "MenuManager.h"
+#include "Theme.h"
 #include "lcdui/Font.h"
 #include "lcdui/FontStorage.h"
 #include "lcdui/Graphics.h"
@@ -316,7 +317,8 @@ void GameMenu::render_76(Graphics* graphics)
     int var2;
     int i;
     if (field_111) {
-        graphics->setColor(0, 0, 20);
+        Theme::Color c = Theme::hudText();
+        graphics->setColor(c.r, c.g, c.b);
         graphics->setFont(font);
         int8_t var7 = 1;
         graphics->drawString("Enter Name", xPos, var7, 20);
@@ -331,7 +333,8 @@ void GameMenu::render_76(Graphics* graphics)
         }
 
     } else {
-        graphics->setColor(0, 0, 0);
+        Theme::Color textColor = Theme::hudText();
+        graphics->setColor(textColor.r, textColor.g, textColor.b);
 
         // Measure the visible menu block and center it on the screen
         int blockW = 0;
@@ -396,7 +399,7 @@ void GameMenu::render_76(Graphics* graphics)
 
         for (i = field_105; i < field_106 + 1; ++i) {
             IGameMenuElement* var4 = vector[i];
-            graphics->setColor(0, 0, 0);
+            graphics->setColor(textColor.r, textColor.g, textColor.b);
             var4->render(graphics, var2, itemX);
             if (i == field_95 && var4->isNotTextRender()) {
                 int var5 = menuX - micro->gameCanvas->helmetSpriteWidth / 2;

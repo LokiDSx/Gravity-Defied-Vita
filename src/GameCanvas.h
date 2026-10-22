@@ -67,9 +67,13 @@ private:
     std::vector<bool> activeKeys = std::vector<bool>(10);
 
     int fps = 0;
+    int zoomMode = 0;
+
+    float getZoomScale() const;
 
 public:
     GameCanvas(Micro* micro);
+    void setZoomMode(int mode);
     void drawSprite(Graphics* g, int spriteNo, int x, int y);
     void requestRepaint(int var1);
     void method_124(bool var1);
@@ -99,6 +103,7 @@ public:
     void renderEngine(int x, int y, int angleF16);
     void renderFender(int x, int y, int angleF16);
     void clearScreenWithWhite();
+    void reloadUiSprites();
     void setColor(int red, int green, int blue);
     void drawGame(Graphics* g);
     void method_161(int var1, bool mode);

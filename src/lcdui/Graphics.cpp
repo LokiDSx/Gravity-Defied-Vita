@@ -89,6 +89,11 @@ void Graphics::setColor(int r, int g, int b)
     SDL_SetRenderDrawColor(renderer, (Uint8)r, (Uint8)g, (Uint8)b, 255);
 }
 
+void Graphics::setScale(float s)
+{
+    SDL_RenderSetScale(renderer, s, s);
+}
+
 void Graphics::setFont(std::shared_ptr<Font> font)
 {
     this->font = font;
