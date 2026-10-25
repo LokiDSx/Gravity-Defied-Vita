@@ -1,6 +1,6 @@
 # Gravity Defied Vita
 
-![](./screens/demo1.gif)
+![](./screens/bg.png)
 
 **Gravity Defied** is a legendary mototrial racing mobile game. It was originally developed by Codebrew Software in 2004 for J2ME platform.
 
@@ -68,7 +68,3 @@ The port supports third-party track packs (`levels.mrg` files, the same format a
 * **Per David Jacobsson** - physics programming, game graphics, levels design
 
 For more information, please visit official site of Codebrew Software: [codebrew.se](http://codebrew.se)
-
-# Contributing
-
-If you want to contribute, feel free to discuss your idea with the rest of the developers in our [Telegram group](https://t.me/+sOfxjrsbkbEwNzc6)
