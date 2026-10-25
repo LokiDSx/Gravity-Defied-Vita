@@ -1,6 +1,6 @@
 # Gravity Defied Vita
 
-![](./screens/bg.png)
+![](./screens/demo1.gif)
 
 **Gravity Defied** is a legendary mototrial racing mobile game. It was originally developed by Codebrew Software in 2004 for J2ME platform.
 
@@ -10,7 +10,9 @@ This is the C++ & SDL2 port of Gravity Defied, which includes all the features o
 
 # PS Vita Port
 
-The game runs natively on the PlayStation Vita at the full 960x544 screen resolution (SDL2 GXM driver), without upscaling or flicker. Save data (settings, progress and highscores) is stored in `ux0:data/GravityDefied`.
+**Current version: 1.5**
+
+The game runs natively on the PlayStation Vita at the full 960x544 screen resolution (SDL2 GXM driver), without upscaling or flicker. Save data (settings, progress and highscores) is stored in `ux0:data/GravityDefied/Saves`.
 
 ### Controls
 
@@ -19,9 +21,13 @@ The game runs natively on the PlayStation Vita at the full 960x544 screen resolu
 | Accelerate | ✕ / D-pad Up / R / stick up |
 | Brake | □ / D-pad Down |
 | Lean backward / forward | D-pad Left / Right, left stick |
-| **Reverse** | **△ / L / |
-| Select in menus | ✕ |
+| **Reverse** | **△ / L1 /** |
+| Select in menus | ✕ / △ |
 | Back / pause menu | ○ / Start |
+
+### Reverse gear
+
+Unlike the original game, the bike can drive backwards: hold **△** or **L1/L2** while the game is running.
 
 ### Dark theme
 
@@ -31,10 +37,6 @@ The Options menu has a **Dark theme** toggle: dark background, blue tracks and w
 
 The Options menu has a **Zoom** submenu: *Off*, *15%*, *30%*. It scales the in-game view (bike, tracks and camera) so the action is easier to follow on the Vita screen; HUD and menus stay at the native size. The choice is saved together with the other options.
 
-### Reverse gear
-
-Unlike the original game, the bike can drive backwards: hold **△** or **L1** while the game is running.
-
 ### Custom tracks (Mods)
 
 The port supports third-party track packs (`levels.mrg` files, the same format as the PSP port):
@@ -42,6 +44,12 @@ The port supports third-party track packs (`levels.mrg` files, the same format a
 * Put each mod into its own folder inside `ux0:data/GravityDefied/Mods`, e.g. `Mods/MyPack/levels.mrg` (a `*.mrg` file placed directly in `Mods` also works).
 * In-game go to **Main menu → Mods** and pick the desired trackpack there. The active pack is remembered between launches.
 * Progress (unlocked leagues/tracks) and highscores are saved **separately for every trackpack**, so custom tracks never overwrite the records of the original game.
+
+### Save data (v1.4)
+
+* Settings, unlocked leagues/tracks and highscores live in `ux0:data/GravityDefied/Saves` — separate files for the original game (`GDTRStates`, `00`, `01`, …) and one set per mod (`mod_*` files), so trackpacks never overwrite each other.
+* Track packs live in `ux0:data/GravityDefied/Mods`, the selected pack is remembered in `ux0:data/GravityDefied/activeMod`.
+* Versions older than 1.4 kept save data directly in `ux0:data/GravityDefied`; the new version no longer reads those files, so they can be safely deleted.
 
 # Authors
 
@@ -60,3 +68,7 @@ The port supports third-party track packs (`levels.mrg` files, the same format a
 * **Per David Jacobsson** - physics programming, game graphics, levels design
 
 For more information, please visit official site of Codebrew Software: [codebrew.se](http://codebrew.se)
+
+# Contributing
+
+If you want to contribute, feel free to discuss your idea with the rest of the developers in our [Telegram group](https://t.me/+sOfxjrsbkbEwNzc6)

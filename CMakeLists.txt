@@ -141,7 +141,7 @@ endif()
 if(VITA)
     vita_create_self(eboot.bin GravityDefied)
     vita_create_vpk(GravityDefied.vpk GDIF00001 eboot.bin
-        VERSION 01.04
+        VERSION 01.05
         NAME "Gravity Defied"
         FILE sce_sys/icon0.png sce_sys/icon0.png
         FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png

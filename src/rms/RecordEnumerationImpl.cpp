@@ -54,7 +54,11 @@ int RecordEnumerationImpl::nextRecordId()
 
 void RecordEnumerationImpl::destroy()
 {
-    data.clear();
+    // Java RMS semantics: destroy() discards the enumeration (iterator) state only.
+    // The records themselves belong to the RecordStore and must NOT be cleared here —
+    // clearing them made every subsequent setRecord() throw (silently swallowed),
+    // so progress/highscores saved in session 2+ never reached the disk.
+    currentPos = 0;
 }
 
 void RecordEnumerationImpl::serialize(FileStream* outStream)
